@@ -9,7 +9,7 @@ load_dotenv(find_dotenv())
 bot = telebot.TeleBot(os.getenv("TOKEN_TELEGRAM"))
 
 def get_clothing_recommendation(temp, humidity, wind_speed, weather, clouds):
-    # Определение ключей для каждого параметра
+
     temp_key = (
         "very_hot" if temp > 25 else
         "hot" if 20 < temp <= 25 else
@@ -23,72 +23,70 @@ def get_clothing_recommendation(temp, humidity, wind_speed, weather, clouds):
     wind_key = "low_wind" if wind_speed <= 3 else "high_wind"
     precip_key = "no_precipitation" if weather == "Clear" and clouds == 0 else "precipitation"
 
-    # Таблица соответствия уникальных рекомендаций
     recommendations = {
-    ("very_hot", "low_humidity", "low_wind", "no_precipitation"): "Легкая одежда, футболка и шорты. (Температура: >25°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("very_hot", "low_humidity", "low_wind", "precipitation"): "Легкая непромокаемая куртка и шорты. (Температура: >25°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("very_hot", "low_humidity", "high_wind", "no_precipitation"): "Легкая одежда плюс ветровка, чтобы защититься от ветра. (Температура: >25°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("very_hot", "low_humidity", "high_wind", "precipitation"): "Легкая непромокаемая куртка и шорты. (Температура: >25°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("very_hot", "high_humidity", "low_wind", "no_precipitation"): "Легкая одежда из дышащих тканей, кепка или шляпа для защиты от солнца. (Температура: >25°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("very_hot", "high_humidity", "low_wind", "precipitation"): "Легкая непромокаемая куртка из дышащих тканей. (Температура: >25°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("very_hot", "high_humidity", "high_wind", "no_precipitation"): "Легкая одежда из дышащих тканей, ветровка. (Температура: >25°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("very_hot", "high_humidity", "high_wind", "precipitation"): "Легкая непромокаемая куртка из дышащих тканей, закрытая обувь. (Температура: >25°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)",
+    ("very_hot", "low_humidity", "low_wind", "no_precipitation"): "Light clothing, t-shirt, and shorts. (Temperature: >25°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("very_hot", "low_humidity", "low_wind", "precipitation"): "Light waterproof jacket and shorts. (Temperature: >25°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("very_hot", "low_humidity", "high_wind", "no_precipitation"): "Light clothing plus a windbreaker to protect against the wind. (Temperature: >25°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("very_hot", "low_humidity", "high_wind", "precipitation"): "Light waterproof jacket and shorts. (Temperature: >25°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("very_hot", "high_humidity", "low_wind", "no_precipitation"): "Light, breathable fabrics, cap or hat for sun protection. (Temperature: >25°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("very_hot", "high_humidity", "low_wind", "precipitation"): "Light waterproof jacket made of breathable fabrics. (Temperature: >25°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("very_hot", "high_humidity", "high_wind", "no_precipitation"): "Light, breathable fabrics, windbreaker. (Temperature: >25°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("very_hot", "high_humidity", "high_wind", "precipitation"): "Light waterproof jacket made of breathable fabrics, closed shoes. (Temperature: >25°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
     
-    ("hot", "low_humidity", "low_wind", "no_precipitation"): "Легкая одежда, футболка и брюки или юбка. (Температура: 20-25°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("hot", "low_humidity", "low_wind", "precipitation"): "Непромокаемая легкая куртка, брюки. (Температура: 20-25°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("hot", "low_humidity", "high_wind", "no_precipitation"): "Легкая куртка или ветровка, брюки. (Температура: 20-25°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("hot", "low_humidity", "high_wind", "precipitation"): "Непромокаемая легкая куртка, брюки. (Температура: 20-25°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("hot", "high_humidity", "low_wind", "no_precipitation"): "Легкая, дышащая одежда, кроссовки или легкая обувь. (Температура: 20-25°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("hot", "high_humidity", "low_wind", "precipitation"): "Непромокаемая легкая куртка из дышащих тканей, закрытая обувь. (Температура: 20-25°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("hot", "high_humidity", "high_wind", "no_precipitation"): "Легкая куртка, дышащие ткани, закрытая обувь. (Температура: 20-25°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("hot", "high_humidity", "high_wind", "precipitation"): "Непромокаемая легкая куртка из дышащих тканей, закрытая обувь. (Температура: 20-25°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)",
+    ("hot", "low_humidity", "low_wind", "no_precipitation"): "Light clothing, t-shirt, and pants or skirt. (Temperature: 20-25°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("hot", "low_humidity", "low_wind", "precipitation"): "Light waterproof jacket, pants. (Temperature: 20-25°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("hot", "low_humidity", "high_wind", "no_precipitation"): "Light jacket or windbreaker, pants. (Temperature: 20-25°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("hot", "low_humidity", "high_wind", "precipitation"): "Light waterproof jacket, pants. (Temperature: 20-25°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("hot", "high_humidity", "low_wind", "no_precipitation"): "Light, breathable clothing, sneakers, or light shoes. (Temperature: 20-25°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("hot", "high_humidity", "low_wind", "precipitation"): "Light waterproof jacket made of breathable fabrics, closed shoes. (Temperature: 20-25°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("hot", "high_humidity", "high_wind", "no_precipitation"): "Light jacket, breathable fabrics, closed shoes. (Temperature: 20-25°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("hot", "high_humidity", "high_wind", "precipitation"): "Light waterproof jacket made of breathable fabrics, closed shoes. (Temperature: 20-25°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
     
-    ("warm", "low_humidity", "low_wind", "no_precipitation"): "Легкий свитер или толстовка, брюки или джинсы. (Температура: 15-20°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("warm", "low_humidity", "low_wind", "precipitation"): "Легкий свитер и непромокаемая куртка. (Температура: 15-20°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("warm", "low_humidity", "high_wind", "no_precipitation"): "Свитер плюс легкая куртка, джинсы. (Температура: 15-20°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("warm", "low_humidity", "high_wind", "precipitation"): "Легкий свитер, непромокаемая куртка. (Температура: 15-20°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("warm", "high_humidity", "low_wind", "no_precipitation"): "Легкие, дышащие ткани, свитер, кроссовки. (Температура: 15-20°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("warm", "high_humidity", "low_wind", "precipitation"): "Легкая непромокаемая куртка, дышащие ткани. (Температура: 15-20°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("warm", "high_humidity", "high_wind", "no_precipitation"): "Легкая куртка, дышащие ткани, закрытая обувь. (Температура: 15-20°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("warm", "high_humidity", "high_wind", "precipitation"): "Легкая непромокаемая куртка, дышащие ткани. (Температура: 15-20°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)",
+    ("warm", "low_humidity", "low_wind", "no_precipitation"): "Light sweater or hoodie, pants, or jeans. (Temperature: 15-20°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("warm", "low_humidity", "low_wind", "precipitation"): "Light sweater and waterproof jacket. (Temperature: 15-20°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("warm", "low_humidity", "high_wind", "no_precipitation"): "Sweater plus light jacket, jeans. (Temperature: 15-20°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("warm", "low_humidity", "high_wind", "precipitation"): "Light sweater, waterproof jacket. (Temperature: 15-20°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("warm", "high_humidity", "low_wind", "no_precipitation"): "Light, breathable fabrics, sweater, sneakers. (Temperature: 15-20°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("warm", "high_humidity", "low_wind", "precipitation"): "Light waterproof jacket, breathable fabrics. (Temperature: 15-20°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("warm", "high_humidity", "high_wind", "no_precipitation"): "Light jacket, breathable fabrics, closed shoes. (Temperature: 15-20°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("warm", "high_humidity", "high_wind", "precipitation"): "Light waterproof jacket, breathable fabrics. (Temperature: 15-20°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
     
-    ("cool", "low_humidity", "low_wind", "no_precipitation"): "Теплый свитер, куртка средней плотности, брюки. (Температура: 10-15°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("cool", "low_humidity", "low_wind", "precipitation"): "Плотная непромокаемая куртка, джинсы. (Температура: 10-15°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("cool", "low_humidity", "high_wind", "no_precipitation"): "Свитер, плотная куртка, шарф, джинсы. (Температура: 10-15°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("cool", "low_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, утепленные брюки. (Температура: 10-15°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("cool", "high_humidity", "low_wind", "no_precipitation"): "Дышащая одежда, утепленная куртка, закрытая обувь. (Температура: 10-15°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("cool", "high_humidity", "low_wind", "precipitation"): "Утепленная непромокаемая куртка, шарф, закрытая обувь. (Температура: 10-15°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("cool", "high_humidity", "high_wind", "no_precipitation"): "Утепленная куртка, шарф, перчатки. (Температура: 10-15°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("cool", "high_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, утепленные брюки, шарф. (Температура: 10-15°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)",
+    ("cool", "low_humidity", "low_wind", "no_precipitation"): "Warm sweater, medium-density jacket, pants. (Temperature: 10-15°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("cool", "low_humidity", "low_wind", "precipitation"): "Thick waterproof jacket, jeans. (Temperature: 10-15°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("cool", "low_humidity", "high_wind", "no_precipitation"): "Sweater, thick jacket, scarf, jeans. (Temperature: 10-15°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("cool", "low_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, insulated pants. (Temperature: 10-15°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("cool", "high_humidity", "low_wind", "no_precipitation"): "Breathable clothing, insulated jacket, closed shoes. (Temperature: 10-15°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("cool", "high_humidity", "low_wind", "precipitation"): "Insulated waterproof jacket, scarf, closed shoes. (Temperature: 10-15°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("cool", "high_humidity", "high_wind", "no_precipitation"): "Insulated jacket, scarf, gloves. (Temperature: 10-15°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("cool", "high_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, insulated pants, scarf. (Temperature: 10-15°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
     
-    ("cold", "low_humidity", "low_wind", "no_precipitation"): "Теплая куртка, утепленные брюки, шапка, перчатки. (Температура: 0-10°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("cold", "low_humidity", "low_wind", "precipitation"): "Плотная непромокаемая куртка, утепленные брюки, шапка, перчатки. (Температура: 0-10°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("cold", "low_humidity", "high_wind", "no_precipitation"): "Теплая куртка, шарф, шапка, перчатки, утепленные брюки. (Температура: 0-10°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("cold", "low_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, утепленные брюки, шапка, перчатки, шарф. (Температура: 0-10°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("cold", "high_humidity", "low_wind", "no_precipitation"): "Теплая куртка, шапка, шарф, утепленная обувь. (Температура: 0-10°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("cold", "high_humidity", "low_wind", "precipitation"): "Плотная непромокаемая куртка, шапка, шарф, утепленные брюки. (Температура: 0-10°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("cold", "high_humidity", "high_wind", "no_precipitation"): "Теплая куртка, шарф, шапка, перчатки, утепленные брюки, ботинки. (Температура: 0-10°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("cold", "high_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, шапка, шарф, утепленные брюки, ботинки. (Температура: 0-10°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)",
+    ("cold", "low_humidity", "low_wind", "no_precipitation"): "Warm jacket, insulated pants, hat, gloves. (Temperature: 0-10°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("cold", "low_humidity", "low_wind", "precipitation"): "Thick waterproof jacket, insulated pants, hat, gloves. (Temperature: 0-10°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("cold", "low_humidity", "high_wind", "no_precipitation"): "Warm jacket, scarf, hat, gloves, insulated pants. (Temperature: 0-10°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("cold", "low_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, insulated pants, hat, scarf, gloves. (Temperature: 0-10°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("cold", "high_humidity", "low_wind", "no_precipitation"): "Insulated jacket, warm hat, scarf, gloves. (Temperature: 0-10°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("cold", "high_humidity", "low_wind", "precipitation"): "Thick waterproof jacket, insulated pants, scarf, gloves. (Temperature: 0-10°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("cold", "high_humidity", "high_wind", "no_precipitation"): "Thick insulated jacket, scarf, gloves, hat. (Temperature: 0-10°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("cold", "high_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, scarf, gloves, insulated pants, hat. (Temperature: 0-10°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
     
-    ("very_cold", "low_humidity", "low_wind", "no_precipitation"): "Очень теплая куртка, термобелье, утепленные брюки, шапка, перчатки. (Температура: <0°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("very_cold", "low_humidity", "low_wind", "precipitation"): "Плотная непромокаемая куртка, термобелье, утепленные брюки, шапка, перчатки. (Температура: <0°C, Влажность: ≤40%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("very_cold", "low_humidity", "high_wind", "no_precipitation"): "Очень теплая куртка, шарф, шапка, перчатки, утепленные брюки, ботинки. (Температура: <0°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: нет)",
-    ("very_cold", "low_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, термобелье, утепленные брюки, шапка, перчатки, ботинки. (Температура: <0°C, Влажность: ≤40%, Ветер: >5 м/с, Осадки: есть)",
-    ("very_cold", "high_humidity", "low_wind", "no_precipitation"): "Очень теплая куртка, термобелье, утепленные брюки, шапка, перчатки, ботинки. (Температура: <0°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: нет)",
-    ("very_cold", "high_humidity", "low_wind", "precipitation"): "Плотная непромокаемая куртка, термобелье, утепленные брюки, шапка, перчатки, ботинки. (Температура: <0°C, Влажность: >60%, Ветер: ≤3 м/с, Осадки: есть)",
-    ("very_cold", "high_humidity", "high_wind", "no_precipitation"): "Очень теплая куртка, шарф, шапка, перчатки, термобелье, утепленные брюки, ботинки. (Температура: <0°C, Влажность: >60%, Ветер: >5 м/с, Осадки: нет)",
-    ("very_cold", "high_humidity", "high_wind", "precipitation"): "Плотная непромокаемая куртка, термобелье, утепленные брюки, шапка, перчатки, ботинки. (Температура: <0°C, Влажность: >60%, Ветер: >5 м/с, Осадки: есть)"
-    }
+    ("very_cold", "low_humidity", "low_wind", "no_precipitation"): "Very thick insulated jacket, snow pants, hat, gloves. (Temperature: <-5°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: none)",
+    ("very_cold", "low_humidity", "low_wind", "precipitation"): "Thick waterproof jacket, snow pants, hat, gloves. (Temperature: <-5°C, Humidity: ≤40%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("very_cold", "low_humidity", "high_wind", "no_precipitation"): "Thick insulated jacket, scarf, hat, gloves, snow pants. (Temperature: <-5°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: none)",
+    ("very_cold", "low_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, insulated pants, hat, scarf, gloves. (Temperature: <-5°C, Humidity: ≤40%, Wind: >5 m/s, Precipitation: yes)",
+    ("very_cold", "high_humidity", "low_wind", "no_precipitation"): "Very thick insulated jacket, warm hat, scarf, gloves. (Temperature: <-5°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: none)",
+    ("very_cold", "high_humidity", "low_wind", "precipitation"): "Thick waterproof jacket, insulated pants, scarf, gloves. (Temperature: <-5°C, Humidity: >60%, Wind: ≤3 m/s, Precipitation: yes)",
+    ("very_cold", "high_humidity", "high_wind", "no_precipitation"): "Thick insulated jacket, scarf, gloves, hat, snow pants. (Temperature: <-5°C, Humidity: >60%, Wind: >5 m/s, Precipitation: none)",
+    ("very_cold", "high_humidity", "high_wind", "precipitation"): "Thick waterproof jacket, scarf, gloves, insulated pants, hat. (Temperature: <-5°C, Humidity: >60%, Wind: >5 m/s, Precipitation: yes)",
+}
 
-    # Получение рекомендации
-    return recommendations.get((temp_key, humidity_key, wind_key, precip_key), "Неизвестные параметры")
+    return recommendations.get((temp_key, humidity_key, wind_key, precip_key), "Unknown parameters")
 
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = types.InlineKeyboardMarkup()
-    button = types.InlineKeyboardButton("Да, посоветовать!", callback_data="Yes")
+    button = types.InlineKeyboardButton("Yes, I recommend it!", callback_data="Yes")
     markup.add(button)
-    bot.send_message(message.chat.id, 'Привет, посоветовать ли вам тип одежды под вашу погоду?', reply_markup=markup)
+    bot.send_message(message.chat.id, 'Hi, can I recommend you the type of clothing for your weather?', reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: call.data == "Yes")
 def yes_call(call):
@@ -97,18 +95,17 @@ def yes_call(call):
 
 def location_user(message):
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    button = types.KeyboardButton("Отправить мое местоположение!", request_location=True)
+    button = types.KeyboardButton("Send my location!", request_location=True)
     markup.add(button)
-    bot.send_message(message.chat.id, "Отправьте пожалуйста свое местоположение!", reply_markup=markup)
+    bot.send_message(message.chat.id, "Please send your location!", reply_markup=markup)
 
 @bot.message_handler(content_types=['location'])
 def sovet(message):
-    #api_key = os.getenv("TOKEN_OPENWEATHERMAP")
-    api_key = '0f331e591e302f74220e17a7e99efd79'
+
+    api_key = os.getenv("TOKEN_OPENWEATHERMAP")
     
-    # Проверка наличия API ключа
     if not api_key:
-        bot.send_message(message.chat.id, "Ошибка: API ключ не найден.")
+        bot.send_message(message.chat.id, "Error: API key not found.")
         return
 
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={message.location.latitude}&lon={message.location.longitude}&appid={api_key}&units=metric"
@@ -117,7 +114,7 @@ def sovet(message):
         response = requests.get(url)
         
         if response.status_code == 200:
-            weather_data = response.json()  # Получение данных из ответа
+            weather_data = response.json()  
             recomends = get_clothing_recommendation(
                 weather_data['main']['temp'], 
                 weather_data['main']['humidity'], 
@@ -125,13 +122,13 @@ def sovet(message):
                 weather_data['weather'][0]['main'], 
                 weather_data['clouds']['all']
             )
-            bot.send_message(message.chat.id, f"Получены данные о погоде: {recomends}")
-            bot.send_message(message.chat.id, "Чтобы снова получить рекомендацию просто отправьте данные о геопозиции")
+            bot.send_message(message.chat.id, f"Weather data received: {recomends}")
+            bot.send_message(message.chat.id, "To get a recommendation again, simply send your location data")
         elif response.status_code == 401:
-            bot.send_message(message.chat.id, "Ошибка 401: Неверный API ключ или проблемы с аутентификацией.")
+            bot.send_message(message.chat.id, "Error 401: Invalid API key or authentication problems.")
         else:
-            bot.send_message(message.chat.id, f"Не удалось получить данные. Код ошибки: {response.status_code}")
+            bot.send_message(message.chat.id, f"Failed to retrieve data. Error code: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        bot.send_message(message.chat.id, f"Произошла ошибка при запросе: {e}")
+        bot.send_message(message.chat.id, f"An error occurred while making your request: {e}")
 
 bot.polling()
